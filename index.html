@@ -1,23 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pantalla del Profe</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        button { padding: 20px 40px; font-size: 24px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 10px; }
+    </style>
+</head>
 <body>
-  <h1>Pantalla del Profe</h1>
-  <button onclick="startRace()">INICIAR CARRERA</button>
+    <h1>Pantalla del Profe</h1>
+    <button onclick="startRace()">INICIAR CARRERA</button>
 
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  
-  <script>
-    // ESTA ES LA CLAVE: Aquí apuntamos al servidor que vive en CodeSandbox
-    const socket = io("https://lk255k-3000.csb.app");
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <script>
+        // CONEXIÓN CORREGIDA: Apuntando directamente al servidor de CodeSandbox
+        const socket = io("https://lk255k-3000.csb.app", {
+            transports: ['websocket'],
+            withCredentials: false
+        });
 
-    function startRace() {
-      console.log("Enviando señal de inicio...");
-      socket.emit('start-race');
-    }
+        function startRace() {
+            console.log("Enviando señal de inicio...");
+            socket.emit('start-race');
+        }
 
-    socket.on('race-started', () => {
-      alert("¡La carrera comenzó!");
-    });
-  </script>
+        socket.on('race-started', () => {
+            alert("¡La carrera comenzó!");
+        });
+    </script>
 </body>
 </html>
