@@ -5,97 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Karts - Carrera</title>
     <style>
-        body {
-            margin: 0;
-            background: #0f0c1b;
-            color: #fff;
-            font-family: system-ui, sans-serif;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        #lobby {
-            text-align: center;
-            padding: 20px;
-        }
-        .btn-start {
-            background: #00ff87;
-            color: #000;
-            border: none;
-            padding: 15px 40px;
-            font-size: 22px;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 0 20px #00ff87;
-        }
-        #track-container {
-            display: none;
-            width: 95vw;
-            height: 70vh;
-            background: #1a162b;
-            border: 4px solid #3d346d;
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        .track {
-            height: 50%;
-            position: relative;
-            display: flex;
-            align-items: center;
-            background: linear-gradient(180deg, #221e38 0%, #2a2544 100%);
-        }
+        body { margin: 0; background: #0f0c1b; color: #fff; font-family: system-ui, sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        #lobby { text-align: center; padding: 20px; }
+        .btn-start { background: #00ff87; color: #000; border: none; padding: 15px 40px; font-size: 22px; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px #00ff87; }
+        #track-container { display: none; width: 95vw; height: 70vh; background: #1a162b; border: 4px solid #3d346d; border-radius: 20px; position: relative; overflow: hidden; }
+        .track { height: 50%; position: relative; display: flex; align-items: center; background: linear-gradient(180deg, #221e38 0%, #2a2544 100%); }
         .track:first-child { border-bottom: 4px dashed #3d346d; }
-
-        .speed-line {
-            position: absolute;
-            width: 100px;
-            height: 2px;
-            background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
-            animation: moveLines 0.4s linear infinite;
-        }
-        @keyframes moveLines {
-            0% { left: 100%; }
-            100% { left: -150px; }
-        }
-        .kart {
-            width: 70px;
-            height: 45px;
-            position: absolute;
-            left: 30px;
-            transition: left 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            box-shadow: 0 0 20px currentColor;
-        }
+        .speed-line { position: absolute; width: 100px; height: 2px; background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0)); animation: moveLines 0.4s linear infinite; }
+        @keyframes moveLines { 0% { left: 100%; } 100% { left: -150px; } }
+        .kart { width: 70px; height: 45px; position: absolute; left: 30px; transition: left 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 20px currentColor; }
         .kart.red { background: #ff0055; }
         .kart.blue { background: #0099ff; }
-        .kart::after {
-            content: '';
-            position: absolute;
-            right: 100%;
-            top: 35%;
-            width: 20px;
-            height: 30%;
-            background: orange;
-            filter: blur(2px);
-            animation: fire 0.1s infinite alternate;
-        }
-        @keyframes fire { 0% { width: 15px; } 100% { width: 25px; } }
-        .meta {
-            position: absolute;
-            right: 30px;
-            height: 100%;
-            width: 15px;
-            background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px);
-        }
+        .meta { position: absolute; right: 30px; height: 100%; width: 15px; background: repeating-linear-gradient(45deg, #fff, #fff 10px, #000 10px, #000 20px); }
         h1 { font-size: 36px; margin: 0 0 10px 0; text-shadow: 0 0 10px #00ff87; }
     </style>
 </head>
@@ -120,12 +41,15 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
  
     <script>
-   
-        const socket = io("https://lk255k-3000.csb.app/");
+        // CONEXIÓN BLINDADA
+        const socket = io("https://lk255k-3000.csb.app", {
+            transports: ['websocket'],
+            withCredentials: false
+        });
+
         let maxDistance = window.innerWidth * 0.78;
 
         window.addEventListener('resize', () => {
@@ -142,21 +66,22 @@
         });
 
         socket.on('update-positions', (gameState) => {
-            const redPos = Math.min(30 + gameState.red.distance, maxDistance);
-            const bluePos = Math.min(30 + gameState.blue.distance, maxDistance);
+            // Verificación por si el servidor envía datos inesperados
+            if (gameState && gameState.red && gameState.blue) {
+                const redPos = Math.min(30 + gameState.red.distance, maxDistance);
+                const bluePos = Math.min(30 + gameState.blue.distance, maxDistance);
 
-            document.getElementById('kart-red').style.left = redPos + 'px';
-            document.getElementById('kart-blue').style.left = bluePos + 'px';
+                document.getElementById('kart-red').style.left = redPos + 'px';
+                document.getElementById('kart-blue').style.left = bluePos + 'px';
 
-            if (redPos >= maxDistance) endRace('🏁 ¡EL EQUIPO ROJO GANA LA CARRERA!');
-            if (bluePos >= maxDistance) endRace('🏁 ¡EL EQUIPO AZUL GANA LA CARRERA!');
+                if (redPos >= maxDistance) endRace('🏁 ¡EL EQUIPO ROJO GANA LA CARRERA!');
+                if (bluePos >= maxDistance) endRace('🏁 ¡EL EQUIPO AZUL GANA LA CARRERA!');
+            }
         });
 
         function endRace(wording) {
-            setTimeout(() => {
-                alert(wording);
-                location.reload();
-            }, 200);
+            alert(wording);
+            location.reload();
         }
     </script>
 </body>
