@@ -5,8 +5,10 @@
   <button onclick="startRace()">INICIAR CARRERA</button>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  
   <script>
-    const socket = io();
+    // ESTA ES LA CLAVE: Aquí apuntamos al servidor que vive en CodeSandbox
+    const socket = io("https://lk255k-3000.csb.app");
 
     function startRace() {
       console.log("Enviando señal de inicio...");
